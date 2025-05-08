@@ -2,6 +2,7 @@ import queue
 import FIXapi
 import threading
 from urllib.parse import urlparse
+import re
 
 import tkinter as tk
 
@@ -63,34 +64,44 @@ class socketMonitorApp:
         except queue.Empty:
             pass
 
-        self.root.after(200, self.check_queue)
+        self.root.after(150, self.check_queue)
 
 
     def connect_fixapi(self,baseurl_input,apikey_input,privatekey_input):
-        try:
-            hostname, port = (urlparse(baseurl_input.get()).hostname,urlparse(baseurl_input.get()).port)
-        
-        except:
-            msgbox.showerror(title='Error',message='Please provide correct URL!')
 
-        apikey = apikey_input.get()
+        if self.sock: 
+            msgbox.showerror(title='Error',message='Already established the connection!')
         
-        privatekey = privatekey_input.get('1.0','end')
-    
-        self.sock = FIXapi.connect(hostname,port)
-        login_msg, self.sender_comp_id, self.target_comp_id, self.msg_seq_num = FIXapi.logon_message(apikey,privatekey)
-        print("send: ",login_msg.replace("\x01","|"))
+        else:
+            try:
+                hostname, port = (urlparse(baseurl_input.get()).hostname,urlparse(baseurl_input.get()).port)
         
-        self.sock.sendall(login_msg.encode('ASCII'))
-        self.msg_seq_num += 1
-        show = "> send: "+login_msg.replace('\x01','|')+'\n'
-        
-        self.display_message.insert(tk.END,show)
+            except:
+                msgbox.showerror(title='Error',message='Please provide correct URL!')
 
-        thread = threading.Thread(target=self.socket_listener, daemon=True)
-        thread.start()
+            apikey = apikey_input.get()
+            
+            privatekey = privatekey_input.get('1.0','end')
+            self.sock = FIXapi.connect(hostname,port)
+        
+            if hostname[0:6] == 'fix-dc':
+                dc = True
+            else:
+                dc = False
 
-        self.check_queue()
+            login_msg, self.sender_comp_id, self.target_comp_id, self.msg_seq_num = FIXapi.logon_message(apikey,privatekey,dc)
+            print("send: ",login_msg.replace("\x01","|"))
+            
+            self.sock.sendall(login_msg.encode('ASCII'))
+            self.msg_seq_num += 1
+            show = "> send: "+login_msg.replace('\x01','|')+'\n'
+            
+            self.display_message.insert(tk.END,show)
+
+            thread = threading.Thread(target=self.socket_listener, daemon=True)
+            thread.start()
+
+            self.check_queue()
 
 
     def disconnect_fixapi(self):
@@ -113,7 +124,7 @@ class socketMonitorApp:
             for param in parametersList:
                 
                 if parametersList[param].get():
-                    send_message = send_message + param + '=' + parametersList[param].get() + '|'
+                    send_message = send_message + re.search(r'\((\d+)\)',param).group(1) + '=' + parametersList[param].get() + '|'
             
 
             if msg_type == 'NewOrderSingle<D>':
@@ -166,6 +177,17 @@ class socketMonitorApp:
                 show = "> send: "+NewOrderList_msg.replace('\x01','|')+'\n'
                 
                 self.display_message.insert(tk.END,show)
+
+            elif msg_type == "OrderAmendKeepPriorityRequest<XAK>":
+                OrderAmendKeepPriorityRequest_msg = FIXapi.OrderAmendKeepPriorityRequest(self.sender_comp_id, self.target_comp_id, self.msg_seq_num, send_message)
+                print("send: ",OrderAmendKeepPriorityRequest_msg.replace("\x01","|"))
+            
+                self.sock.sendall(OrderAmendKeepPriorityRequest_msg.encode('ASCII'))
+                self.msg_seq_num += 1
+                show = "> send: "+OrderAmendKeepPriorityRequest_msg.replace('\x01','|')+'\n'
+                
+                self.display_message.insert(tk.END,show)
+                
 
             elif msg_type == "LimitQuery<XLQ>":
                 LimitQuery_msg = FIXapi.LimitQuery(self.sender_comp_id, self.target_comp_id, self.msg_seq_num, send_message)
