@@ -1,26 +1,26 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import time
-import re
 
 import socketMonitorApp
 
 root = tk.Tk()
 
-root.title('FIX API test tool')
+root.title('FIX API test tool version 0.1.0')
 root.geometry('800x600')
+
 
 
 '--- Top ---'
 frame_top = ttk.Frame(root)
-frame_top.configure(borderwidth=2,relief='solid',height=260,width=900)
+frame_top.configure(borderwidth=2,relief='solid',height=260,width=800)
 frame_top.pack(side="top",anchor='w')
 
 notebook_style = ttk.Style()
 notebook_style.theme_use('alt')
 notebook_style.configure('Lefttab.TNotebook',anchor='w',padding=[10,5,10,5])
 
-notebook = ttk.Notebook(frame_top,style='Lefttab.TNotebook',height=260, width=900)
+notebook = ttk.Notebook(frame_top,style='Lefttab.TNotebook',height=260, width=800)
 
 note_frame1 = ttk.Frame()
 note_frame2 = ttk.Frame()
@@ -41,7 +41,7 @@ label.pack()
 app_msgs = tk.Listbox(msg_chosen_frame,justify='left', selectmode='browse')
 
 msg_item = ['NewOrderSingle<D>', 'OrderCancelRequest<F>','OrderCancelRequestAndNewOrderSingle<XCN>','OrderMassCancelRequest<q>',
-            'NewOrderList<E>','LimitQuery<XLQ>','InstrumentListRequest<x>','MarketDataRequest<V>']
+            'NewOrderList<E>','OrderAmendKeepPriorityRequest<XAK>','LimitQuery<XLQ>','InstrumentListRequest<x>','MarketDataRequest<V>']
 
 msg_chosen_sbar = ttk.Scrollbar(app_msgs, command=app_msgs.yview)
 msg_chosen_sbar.pack(side='right', fill='y')
@@ -60,6 +60,10 @@ def on_select(event):
         selected_msg_type = selected_item
         switch_frame(selected_item)
 
+    
+
+
+
 def switch_frame(frame_item):
     global current_container
     global current_scrollbar
@@ -74,6 +78,8 @@ def switch_frame(frame_item):
     current_container = next_container
     current_scrollbar = next_scrollbar
     current_params = next_params
+
+
 
 
 app_msgs.bind("<<ListboxSelect>>",on_select)
@@ -111,8 +117,8 @@ def NewOrderSingle_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 16)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -139,8 +145,8 @@ def OrderCancelRequest_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 16)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -173,8 +179,8 @@ def OrderCancelRequestAndNewOrderSingle_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=42,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 5)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 5)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -201,8 +207,8 @@ def OrderMassCancelRequest_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 16)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -244,8 +250,8 @@ def NewOrderList_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=30,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 14)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 14)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -256,6 +262,34 @@ def NewOrderList_parameters():
 
     return container,scrollbar,parameters_list
 
+def OrderAmendKeepPriorityRequest_parameters():
+    container = tk.Canvas(parameter_bottom_frame)
+    scrollbar = ttk.Scrollbar(parameter_bottom_frame, orient="vertical", command=container.yview)
+    container.configure(yscrollcommand=scrollbar.set)
+
+    table_frame = ttk.Frame(container)
+    container.create_window((0, 0), window=table_frame, anchor="nw")
+
+
+    parameter_labels = ["ClOrdID(11)","OrigClOrdID(41)","OrderID(37)","Symbol(55)","OrderQty(38)"]
+
+    parameters_list = {}
+
+    for index in range(len(parameter_labels)):
+        a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
+        a.grid(row=index,column=0)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
+
+
+    table_frame.update_idletasks()
+    container.config(scrollregion=container.bbox("all"))
+    
+
+    messages_list['OrderAmendKeepPriorityRequest<XAK>'] = (container,scrollbar,parameters_list)
+
+    return container,scrollbar,parameters_list
+    
 def LimitQuery_parameters(var):
     container = tk.Canvas(parameter_bottom_frame)
     scrollbar = ttk.Scrollbar(parameter_bottom_frame, orient="vertical", command=container.yview)
@@ -273,8 +307,8 @@ def LimitQuery_parameters(var):
     a = ttk.Label(table_frame,text=parameter_labels[0],font=('Arial', 12),width=26,anchor='center')
     a.grid(row=0,column=0)
 
-    parameters_list[re.search(r'\((\d+)\)',parameter_labels[0]).group(1)] = ttk.Entry(table_frame, width = 16,textvariable=var)
-    parameters_list[re.search(r'\((\d+)\)',parameter_labels[0]).group(1)].grid(row=0,column=1)
+    parameters_list[parameter_labels[0]] = ttk.Entry(table_frame, width = 16,textvariable=var)
+    parameters_list[parameter_labels[0]].grid(row=0,column=1)
     
 
 
@@ -303,8 +337,8 @@ def InstrumentListRequest_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 16)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -332,8 +366,8 @@ def MarketDataRequest_parameters():
     for index in range(len(parameter_labels)):
         a = ttk.Label(table_frame,text=parameter_labels[index],font=('Arial', 12),width=26,anchor='center')
         a.grid(row=index,column=0)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)] = ttk.Entry(table_frame, width = 16)
-        parameters_list[re.search(r'\((\d+)\)',parameter_labels[index]).group(1)].grid(row=index,column=1)
+        parameters_list[parameter_labels[index]] = ttk.Entry(table_frame, width = 16)
+        parameters_list[parameter_labels[index]].grid(row=index,column=1)
 
 
     table_frame.update_idletasks()
@@ -349,11 +383,20 @@ current_container.pack(side="left", fill="both", expand=True)
 current_scrollbar.pack(side="right", fill="y")
 selected_msg_type = 'NewOrderSingle<D>'
 
+def _on_mousewheel(event):
+    #print(event)
+    if event.delta > 0:
+        current_container.yview_scroll(-1, "units")
+    elif event.delta < 0:
+        current_container.yview_scroll(1, "units")
+current_container.bind_all("<MouseWheel>", _on_mousewheel)
+
 
 OrderCancelRequest_parameters()
 OrderCancelRequestAndNewOrderSingle_parameters()
 OrderMassCancelRequest_parameters()
 NewOrderList_parameters()
+OrderAmendKeepPriorityRequest_parameters()
 
 var = tk.StringVar(value=int(time.time()*1000))
 LimitQuery_parameters(var)
@@ -362,9 +405,10 @@ InstrumentListRequest_parameters()
 MarketDataRequest_parameters()
 
 
+
+
 send_msg = ttk.Button(note_frame1,text="Send", padding=5, width=5, command=lambda: app.sending(selected_msg_type,current_params))
 send_msg.pack(side='left',padx=5)
-
 
 '''-------message sending frame end---------'''
 
@@ -376,7 +420,7 @@ connect_frame.pack(side='left', anchor='nw')
 label_baseurl = tk.Label(connect_frame, text='Base URL:', font=('Arial', 12), width=25, height=2)
 label_baseurl.grid(row=0,column=0,padx=25,rowspan=2)
 
-init_value1 = tk.StringVar(value="tcp+tls://fix-oe.binance.com:9000")
+init_value1 = tk.StringVar(value="tcp+tls://fix-oe.testnet.binance.vision:9000")
 baseurl_input = ttk.Entry(connect_frame,textvariable=init_value1, width=45)
 baseurl_input.grid(row=0, column=1, padx=15, pady=15, ipady=5, rowspan=2, columnspan=2)
 
@@ -392,7 +436,7 @@ label_prvkey = tk.Label(connect_frame, text='PRIVATE KEY:', font=('Arial', 12), 
 label_prvkey.grid(row=4,column=0,padx=25,pady=15,rowspan=2,sticky='n')
 
 privatekey_input = tk.Text(connect_frame, bg="#fff", width=58, height=4, relief='groove')
-
+privatekey_input.insert(tk.END,'''''')
 
 privatekey_input.grid(row=4, column=1, padx=16, pady=15, ipady=1, rowspan=2, columnspan=2,sticky='sw')
 
