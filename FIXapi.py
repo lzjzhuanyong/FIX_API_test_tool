@@ -32,7 +32,7 @@ def get_final_message(fix_message):
     return final_msg.replace('|','\x01')
 
 
-def logon_message(apikey, prvkey): 
+def logon_message(apikey, prvkey, dc=None): 
     api_key = apikey
     private_key = prvkey                             # 获取私钥
     private_key = ECC.import_key(private_key)
@@ -46,6 +46,10 @@ def logon_message(apikey, prvkey):
 
     fix_message=(f"35=A|"f"49={sender_comp_id}|"f"56={target_comp_id}|"f"34={msg_seq_num}|"f"52={utc_timestamp}|"
     f"95={len(signature)}|"f"96={signature}|"f"98=0|"f"108=60|"f"141=Y|"f"553={api_key}|"f"25035=1|")
+
+    if dc:
+        fix_message = fix_message + f"9406=Y|"
+
     send_msg = get_final_message(fix_message)
     return (send_msg, sender_comp_id, target_comp_id, msg_seq_num)
 
@@ -101,6 +105,11 @@ def OrderMassCancelRequest(sender_comp_id,target_comp_id, msg_seq_num, msg):
 
 def NewOrderList(sender_comp_id,target_comp_id, msg_seq_num, msg):
     fix_message = (f"35=E|"f"49={sender_comp_id}|"f"56={target_comp_id}|"f"34={msg_seq_num}|"f"52={get_time()}|"+msg)
+    send_msg = get_final_message(fix_message)
+    return send_msg
+
+def OrderAmendKeepPriorityRequest(sender_comp_id,target_comp_id, msg_seq_num, msg):
+    fix_message = (f"35=XAK|"f"49={sender_comp_id}|"f"56={target_comp_id}|"f"34={msg_seq_num}|"f"52={get_time()}|"+msg)
     send_msg = get_final_message(fix_message)
     return send_msg
 
